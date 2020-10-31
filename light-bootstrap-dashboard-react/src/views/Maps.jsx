@@ -33,16 +33,18 @@ const CustomMap = withScriptjs(
         scrollwheel: false,
         zoomControl: true
       }}
+
     >
       <Marker position={{ lat: 40.748817, lng: -73.985428 }} />
     </GoogleMap>
+
   ))
 );
 
 function Maps({ ...prop }) {
   return (
     <CustomMap
-      googleMapURL="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE"
+      googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJrdhB6RhfeY6V7rOVpc-Nk5dU9olBc-0"
       loadingElement={<div style={{ height: `100%` }} />}
       containerElement={<div style={{ height: `100vh` }} />}
       mapElement={<div style={{ height: `100%` }} />}

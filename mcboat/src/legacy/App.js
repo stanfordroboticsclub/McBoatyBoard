@@ -1,6 +1,7 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import logo from '../assets/ims/robologonew.png';
+import '../assets/css/App.css';
+import { ArrowRight } from 'react-bootstrap-icons';
 
 function App() {
   return (
