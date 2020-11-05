@@ -21,23 +21,36 @@ import NotificationSystem from "react-notification-system";
 import AdminNavbar from "components/Navbars/AdminNavbar";
 import Footer from "components/Footer/Footer";
 import Sidebar from "components/Sidebar/Sidebar";
-//import FixedPlugin from "components/FixedPlugin/FixedPlugin.jsx";
-
 import { style } from "variables/Variables.jsx";
 
-import routes from "routes.js";
+import routes from "../routes";
 
 import image from "assets/img/sidebar-3.jpg";
+
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+const client = new W3CWebSocket('ws://localhost:8000');
 
 class Admin extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       _notificationSystem: null,
       image: image,
       color: "black",
       hasImage: true,
-      fixedClasses: "dropdown show-dropdown open"
+      messages: [],
+      fixedClasses: "dropdown show-dropdown open",
+      client: client
+    };
+
+    client.onopen = () => {
+      console.log('WebSocket Client Connected');
+    };
+    client.onmessage = (message) => {
+      this.state.messages.push(message);
+      console.log(message);
     };
   }
 
@@ -178,8 +191,14 @@ class Admin extends Component {
           <AdminNavbar
             {...this.props}
             brandText={this.getBrandText(this.props.location.pathname)}
+            client = {this.state.client}
           />
           <Switch>{this.getRoutes(routes)}</Switch>
+          {
+            this.state.messages.map((message, index) => {
+              return <div key={index}>{message}</div>
+            })
+          }
           <Footer />
           {/*<FixedPlugin*/}
           {/*  handleImageClick={this.handleImageClick}*/}

@@ -16,84 +16,106 @@
 
 */
 import React, { Component } from 'react';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
-import { Polyline, DrawingManager, Marker } from '@react-google-maps/api';
-const mapContainerStyle = {
-    height: "400px",
-    width: "800px"
-};
-
-const center = {
-    lat: 0,
-    lng: -180
-};
-
-const onLoad = polyline => {
-    console.log('polyline: ', polyline)
-};
-
-const path = [
-    {lat: 37.772, lng: -122.214},
-    {lat: 21.291, lng: -157.821},
-    {lat: -18.142, lng: 178.431},
-    {lat: -27.467, lng: 153.027}
-];
-
-const options = {
-    strokeColor: '#FF0000',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    fillColor: '#FF0000',
-    fillOpacity: 0.35,
-    clickable: false,
-    draggable: false,
-    editable: false,
-    visible: true,
-    radius: 30000,
-    paths: [
-        {lat: 37.772, lng: -122.214},
-        {lat: 21.291, lng: -157.821},
-        {lat: -18.142, lng: 178.431},
-        {lat: -27.467, lng: 153.027}
-    ],
-    zIndex: 1
-};
-var markerList = [];
-const onMarkerComplete = marker => {
-    markerList.push(marker);
-    console.log("Marker Lat: ", markerList);
-};
-
-const onLoadDraw = drawingManager => {
-    console.log(drawingManager)
-};
-const onPolygonComplete = polygon => {
-    console.log("Polygon: " , polygon)
-};
+import { GoogleMap, LoadScript} from '@react-google-maps/api';
+import { Polyline, DrawingManager} from '@react-google-maps/api';
 class MapsExperimental extends Component {
+    constructor(props) {
+        super(props);
+        this.map = React.createRef();
+        this.mapContainerStyle = {
+            height: "400px",
+            width: "800px"
+        };
+
+        this.center = {
+            lat: 0,
+            lng: -180
+        };
+
+        this.onLoad = polyline => {
+            console.log('polyline: ', polyline)
+        };
+
+        this.path = [
+            {lat: 37.772, lng: -122.214},
+            {lat: 21.291, lng: -157.821},
+            {lat: -18.142, lng: 178.431},
+            {lat: -27.467, lng: 153.027}
+        ];
+
+        this.options = {
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            clickable: false,
+            draggable: false,
+            editable: false,
+            visible: true,
+            radius: 30000,
+            paths: [
+                {lat: 37.772, lng: -122.214},
+                {lat: 21.291, lng: -157.821},
+                {lat: -18.142, lng: 178.431},
+                {lat: -27.467, lng: 153.027}
+            ],
+            zIndex: 1
+        };
+        this.markerList = [];
+
+        this.onMarkerComplete = marker => {
+            var infowindow = new window.google.maps.InfoWindow({
+                content: "Location:" + "<br>" + marker.getPosition().toUrlValue(6)
+        });
+            window.google.maps.event.addListener(marker, 'mouseover', (function(marker, i) {
+                return function(evt) {
+                    infowindow.open(this.map, marker);
+                }
+            })(marker));
+            window.google.maps.event.addListener(marker, 'mouseout', (function(marker) {
+                return function(evt) {
+                    infowindow.close();
+                }
+            })(marker));
+            marker.onMouseOver = this.onMouseOver(marker);
+            this.markerList.push(marker);
+            console.log("Marker Lat: ", this.markerList);
+        };
+
+
+        this.onLoadDraw = drawingManager => {
+            console.log(drawingManager)
+        };
+        this.onPolygonComplete = polygon => {
+            console.log("Polygon: " , polygon)
+        };
+    }
     render() {
         return (
             <LoadScript
                 googleMapsApiKey="AIzaSyBJrdhB6RhfeY6V7rOVpc-Nk5dU9olBc-0&libraries=drawing"
             >
                 <GoogleMap
-                    mapContainerStyle={mapContainerStyle}
-                    center={center}
+                    mapContainerStyle={this.mapContainerStyle}
+                    center={this.center}
                     zoom={2}
+                    ref = {this.map}
                 >
                     <Polyline
-                        onLoad={onLoad}
-                        path={path}
-                        options={options}
+                        onLoad={this.onLoad}
+                        path={this.path}
+                        options={this.options}
                     />
                     <DrawingManager
-                        onLoad={onLoadDraw}
-                        onPolygonComplete={onPolygonComplete}
-                        onMarkerComplete={onMarkerComplete}
+                        onLoad={this.onLoadDraw}
+                        onPolygonComplete={this.onPolygonComplete}
+                        onMarkerComplete={this.onMarkerComplete}
                     />
                     { /* Child components, such as markers, info windows, etc. */ }
                     <></>
                 </GoogleMap>
+
             </LoadScript>
         )
     }

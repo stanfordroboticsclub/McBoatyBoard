@@ -19,6 +19,31 @@ import React, { Component } from "react";
 import { NavItem, Nav, NavDropdown, MenuItem } from "react-bootstrap";
 
 class AdminNavbarLinks extends Component {
+    constructor(props) {
+        super(props);
+        this.sendThing = this
+            .sendThing
+            .bind(this);
+        this.method = this.method.bind(this);
+        this.state = {
+            client: this.props.client
+        };
+    }
+    method() {
+        console.log("BUTTON");
+    }
+    sendThing() {
+        if (this.props.client.readyState === 0) {
+            console.log ("NOt ready");
+        }
+        if (this.props.client.readyState === 1) {
+            console.log("SENT MESSAGE");
+            this.props.client.send("message");
+        }
+        else {
+            console.log("Not ready");
+        }
+    }
   render() {
     const notification = (
       <div>
@@ -49,7 +74,8 @@ class AdminNavbarLinks extends Component {
             <MenuItem eventKey={2.5}>Another notifications</MenuItem>
           </NavDropdown>
             <NavItem eventKey={3} href="">
-                <button> Refresh </button>
+                <button onClick={this.sendThing}> Refresh </button>
+                <button onClick={this.method}> BUTTON </button>
             </NavItem>
           {/*<NavItem eventKey={3} href="#">*/}
           {/*  <i className="fa fa-search" />*/}
