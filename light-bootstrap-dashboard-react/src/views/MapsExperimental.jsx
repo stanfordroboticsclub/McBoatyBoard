@@ -78,7 +78,6 @@ class MapsExperimental extends Component {
                     infowindow.close();
                 }
             })(marker));
-            marker.onMouseOver = this.onMouseOver(marker);
             this.markerList.push(marker);
             console.log("Marker Lat: ", this.markerList);
         };
