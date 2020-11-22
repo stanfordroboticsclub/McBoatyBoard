@@ -29,12 +29,11 @@ import image from "assets/img/sidebar-3.jpg";
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const client = new W3CWebSocket('ws://localhost:8000');
-
 class Admin extends Component {
+
   constructor(props) {
     super(props);
-
+    const client = new W3CWebSocket('ws://localhost:8500/');
     this.state = {
       _notificationSystem: null,
       image: image,
@@ -44,13 +43,17 @@ class Admin extends Component {
       fixedClasses: "dropdown show-dropdown open",
       client: client
     };
-
+    console.log("Websocket something");
     client.onopen = () => {
       console.log('WebSocket Client Connected');
     };
+    client.onclose = () => {
+      console.log("WebSocket closed");
+    };
     client.onmessage = (message) => {
-      this.state.messages.push(message);
-      console.log(message);
+      this.state.messages.push(message.data);
+      console.log("received message");
+      console.log(message.data);
     };
   }
 
@@ -94,6 +97,8 @@ class Admin extends Component {
             render={props => (
               <prop.component
                 {...props}
+                messages = {this.state.messages}
+                client = {this.state.client}
                 handleClick={this.handleNotificationClick}
               />
             )}
@@ -186,15 +191,18 @@ class Admin extends Component {
         <NotificationSystem ref="notificationSystem" style={style} />
         <Sidebar {...this.props} routes={routes} image={this.state.image}
         color={this.state.color}
-        hasImage={this.state.hasImage}/>
+        hasImage={this.state.hasImage}
+        messages = {this.state.messages}/>
         <div id="main-panel" className="main-panel" ref="mainPanel">
           <AdminNavbar
             {...this.props}
             brandText={this.getBrandText(this.props.location.pathname)}
             client = {this.state.client}
+            messages = {this.state.messages}
           />
           <Switch>{this.getRoutes(routes)}</Switch>
           {
+
             this.state.messages.map((message, index) => {
               return <div key={index}>{message}</div>
             })

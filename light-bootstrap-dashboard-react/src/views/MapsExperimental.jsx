@@ -19,8 +19,13 @@ import React, { Component } from 'react';
 import { GoogleMap, LoadScript} from '@react-google-maps/api';
 import { Polyline, DrawingManager} from '@react-google-maps/api';
 class MapsExperimental extends Component {
+
     constructor(props) {
         super(props);
+        this.state = {
+          messages: props.messages,
+            client: props.client
+        };
         this.map = React.createRef();
         this.mapContainerStyle = {
             height: "400px",
@@ -65,6 +70,7 @@ class MapsExperimental extends Component {
         this.markerList = [];
 
         this.onMarkerComplete = marker => {
+            console.log("MESSS:LDJKF:LSDJFK:LKDJSF:LDJFK" + this.state.messages);
             var infowindow = new window.google.maps.InfoWindow({
                 content: "Location:" + "<br>" + marker.getPosition().toUrlValue(6)
         });
@@ -72,7 +78,7 @@ class MapsExperimental extends Component {
                 return function(evt) {
                     infowindow.open(this.map, marker);
                 }
-            })(marker));
+        })(marker));
             window.google.maps.event.addListener(marker, 'mouseout', (function(marker) {
                 return function(evt) {
                     infowindow.close();
@@ -88,6 +94,10 @@ class MapsExperimental extends Component {
         };
         this.onPolygonComplete = polygon => {
             console.log("Polygon: " , polygon)
+        };
+        this.state.client.onmessage = (message) => {
+            console.log("UPDATED THING");
+            console.log(message.data);
         };
     }
     render() {

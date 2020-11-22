@@ -23,7 +23,8 @@ class Sidebar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      width: window.innerWidth
+      width: window.innerWidth,
+      messages: props.messages
     };
   }
   activeRoute(routeName) {
