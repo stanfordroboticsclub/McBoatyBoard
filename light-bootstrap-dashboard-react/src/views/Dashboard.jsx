@@ -15,6 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
+
 import React, { Component } from "react";
 import ChartistGraph from "react-chartist";
 import { Grid, Row, Col } from "react-bootstrap";
@@ -28,7 +29,54 @@ import {
   mockVoltageData
 } from "variables/Variables.jsx";
 
+import 'react-animated-term/dist/react-animated-term.css'
+
+import config from "../assets/config";
+import firebase from "firebase";
 class Dashboard extends Component {
+  is_mounted = false;
+
+  constructor(props) {
+    super(props);
+    firebase.initializeApp(config);
+    this.state = {
+      client: props.client
+    };
+    this.state = {
+      termLines : [{'text': 'Logging information from server...',
+          'cmd': true}, {'text': 'TES:LJKD:SLJFKDS:lf',
+        'cmd': true}],
+      logs: ['{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}']
+    };
+
+    this.props.client.onmessage = (message) => {
+        console.log("Update from dashboard class");
+        this.writeUserData();
+        console.log("Message " + this.props.messages.toString());
+        console.log("termLines: ", this.state.termLines);
+      this.setState((prevState, props) => {
+          prevState.termLines.push({'text': message.data, 'cmd': true});
+          prevState.logs.push(message.data.toString());
+          console.log(":LKDJ:LKDJS", message.data);
+          return {termLines: prevState.termLines,
+                  logs: prevState.logs}
+        });
+      };
+
+  }
+  writeUserData = () => {
+    firebase.database()
+        .ref("/")
+        .set(this.state);
+    console.log("DATA SAVED");
+  };
+  componentDidMount() {
+    this.is_mounted = true;
+  }
+  componentWillUnmount() {
+    this.is_mounted = false;
+  }
+
   createLegend(json) {
     var legend = [];
     for (var i = 0; i < json["names"].length; i++) {
@@ -48,7 +96,7 @@ class Dashboard extends Component {
               <StatsCard
                 bigIcon={<i className="pe-7s-battery text-warning" />}
                 statsText="Battery"
-                statsValue="100%"
+                statsValue= {JSON.parse(this.state.logs[0]).battery}
                 statsIcon={<i className="fa fa-refresh" />}
                 statsIconText="Updated now"
               />
@@ -126,28 +174,9 @@ class Dashboard extends Component {
           </Row>
 
           <Row>
-            {/*<Col md={6}>*/}
-            {/*  <Card*/}
-            {/*    id="chartActivity"*/}
-            {/*    title="2014 Sales"*/}
-            {/*    category="All products including Taxes"*/}
-            {/*    stats="Data information certified"*/}
-            {/*    statsIcon="fa fa-check"*/}
-            {/*    content={*/}
-            {/*      <div className="ct-chart">*/}
-            {/*        <ChartistGraph*/}
-            {/*          data={dataBar}*/}
-            {/*          type="Bar"*/}
-            {/*          options={optionsBar}*/}
-            {/*          responsiveOptions={responsiveBar}*/}
-            {/*        />*/}
-            {/*      </div>*/}
-            {/*    }*/}
-            {/*    legend={*/}
-            {/*      <div className="legend">{this.createLegend(legendBar)}</div>*/}
-            {/*    }*/}
-            {/*  />*/}
-            {/*</Col>*/}
+            <Col md={6}>
+              {this.state.logs.toString()}
+            </Col>
 
             {/*<Col md={6}>*/}
             {/*  <Card*/}

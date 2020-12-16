@@ -29,11 +29,16 @@ import image from "assets/img/sidebar-3.jpg";
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
+
+
 class Admin extends Component {
 
   constructor(props) {
     super(props);
-    const client = new W3CWebSocket('ws://localhost:8500/');
+    const client = new W3CWebSocket('ws://localhost:9999/');
+
+
+
     this.state = {
       _notificationSystem: null,
       image: image,
@@ -41,7 +46,8 @@ class Admin extends Component {
       hasImage: true,
       messages: [],
       fixedClasses: "dropdown show-dropdown open",
-      client: client
+      client: client,
+      logs: []
     };
     console.log("Websocket something");
     client.onopen = () => {
@@ -50,12 +56,13 @@ class Admin extends Component {
     client.onclose = () => {
       console.log("WebSocket closed");
     };
-    client.onmessage = (message) => {
-      this.state.messages.push(message.data);
-      console.log("received message");
-      console.log(message.data);
-    };
+    // client.onmessage = (message) => {
+    //   this.state.messages.push(message.data);
+    //   console.log("received message");
+    //   console.log(message.data);
+    // };
   }
+
 
   handleNotificationClick = position => {
     var color = Math.floor(Math.random() * 4 + 1);
@@ -88,6 +95,7 @@ class Admin extends Component {
       autoDismiss: 10
     });
   };
+
   getRoutes = routes => {
     return routes.map((prop, key) => {
       if (prop.layout === "/admin") {
@@ -100,6 +108,8 @@ class Admin extends Component {
                 messages = {this.state.messages}
                 client = {this.state.client}
                 handleClick={this.handleNotificationClick}
+                handleNewLog = {this.handleNewLog}
+                logs = {this.state.logs}
               />
             )}
             key={key}
