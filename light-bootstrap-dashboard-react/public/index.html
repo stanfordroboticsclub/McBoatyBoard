@@ -37,6 +37,15 @@
       sizes="76x76"
       href="%PUBLIC_URL%/apple-icon.png"
     />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
+    <div id="mapid"></div>
+
 
     <!--
         Notice the use of %PUBLIC_URL% in the tags above.
@@ -63,7 +72,9 @@
 
     <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
-    <div class="map"> </div>
+
+<!--    <div id='mapid'></div>-->
+
     <!--
         This HTML file is a template.
         If you open it directly in the browser, you will see an empty page.
@@ -107,5 +118,18 @@
       firebase.initializeApp(firebaseConfig);
       firebase.analytics();
     </script>
+    <div class="map"> </div>
+    <style>
+      .leaflet-container {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>-->
+
+<!--    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"-->
+<!--            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="-->
+<!--            crossorigin=""></script>-->
   </body>
 </html>

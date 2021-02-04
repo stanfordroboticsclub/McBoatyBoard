@@ -16,8 +16,8 @@
 
 */
 import React, { Component } from 'react';
-import { GoogleMap, LoadScript} from '@react-google-maps/api';
-import { Polyline, DrawingManager} from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+
 class MapsExperimental extends Component {
 
     constructor(props) {
@@ -69,63 +69,21 @@ class MapsExperimental extends Component {
         };
         this.markerList = [];
 
-        this.onMarkerComplete = marker => {
-            console.log("MESSS:LDJKF:LSDJFK:LKDJSF:LDJFK" + this.state.messages);
-            var infowindow = new window.google.maps.InfoWindow({
-                content: "Location:" + "<br>" + marker.getPosition().toUrlValue(6)
-        });
-            window.google.maps.event.addListener(marker, 'mouseover', (function(marker, i) {
-                return function(evt) {
-                    infowindow.open(this.map, marker);
-                }
-        })(marker));
-            window.google.maps.event.addListener(marker, 'mouseout', (function(marker) {
-                return function(evt) {
-                    infowindow.close();
-                }
-            })(marker));
-            this.markerList.push(marker);
-            console.log("Marker Lat: ", this.markerList);
-        };
 
-
-        this.onLoadDraw = drawingManager => {
-            console.log(drawingManager)
-        };
-        this.onPolygonComplete = polygon => {
-            console.log("Polygon: " , polygon)
-        };
-        this.state.client.onmessage = (message) => {
-            console.log("UPDATED THING");
-            console.log(message.data);
-        };
     }
     render() {
         return (
-            <LoadScript
-                googleMapsApiKey="AIzaSyBJrdhB6RhfeY6V7rOVpc-Nk5dU9olBc-0&libraries=drawing"
-            >
-                <GoogleMap
-                    mapContainerStyle={this.mapContainerStyle}
-                    center={this.center}
-                    zoom={2}
-                    ref = {this.map}
-                >
-                    <Polyline
-                        onLoad={this.onLoad}
-                        path={this.path}
-                        options={this.options}
-                    />
-                    <DrawingManager
-                        onLoad={this.onLoadDraw}
-                        onPolygonComplete={this.onPolygonComplete}
-                        onMarkerComplete={this.onMarkerComplete}
-                    />
-                    { /* Child components, such as markers, info windows, etc. */ }
-                    <></>
-                </GoogleMap>
-
-            </LoadScript>
+            <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+                <TileLayer
+                    attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={[51.505, -0.09]}>
+                    <Popup>
+                        A pretty CSS3 popup. <br /> Easily customizable.
+                    </Popup>
+                </Marker>
+            </MapContainer>
         )
     }
 }

@@ -536,8 +536,8 @@ var optionsSales = {
   }
 };
 var voltageChart = {
-  low: 0,
-  high: 30,
+  low: 40,
+  high: 50,
   showArea: false,
   height: "245px",
   axisX: {
@@ -545,7 +545,7 @@ var voltageChart = {
   },
   lineSmooth: true,
   showLine: true,
-  showPoint: false,
+  showPoint: true,
   fullWidth: true,
   chartPadding: {
     right: 50

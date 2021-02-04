@@ -49,14 +49,19 @@ class Dashboard extends Component {
     this.state = {
       logs: ['{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}'],
       recent: '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}',
-      databaseRecent: '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}'
+      databaseRecent: '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}',
+      velocityRaw: [],
+      velocityData: {
+        labels: [      ],
+        series:[]
+      }
     };
 
     this.props.client.onmessage = (message) => {
       this.setState((prevState, props) => {
         prevState.logs.push(message.data.toString());
         prevState.recent = message.data.toString();
-        console.log("On Message: ", message.data);
+        //console.log("On Message: ", message.data);
         return {
           logs: prevState.logs,
           recent: prevState.recent
@@ -93,7 +98,6 @@ class Dashboard extends Component {
         .get()
         .then(function (querySnapshot) {
           var counter = querySnapshot.size.valueOf();
-          console.log("Starting doc count", counter);
           querySnapshot.forEach(function (doc) {
               if (counter > 10) {
                 counter--;
@@ -122,7 +126,7 @@ class Dashboard extends Component {
               //console.log(doc.id, " => ", doc.data());
               currentThis.setState((prevState, props) => {
                 prevState.databaseRecent = doc.data();
-                console.log("Saved Database Get Data to React State", prevState.databaseRecent);
+                //console.log("Saved Database Get Data to React State", prevState.databaseRecent);
                 return {
                   databaseRecent: prevState.databaseRecent
                 }
@@ -134,12 +138,61 @@ class Dashboard extends Component {
           });
     }
   };
+  update = () => {
+    this.getData();
+    this.deleteDocuments();
+    this.updateVelocityGraph();
+  };
   componentDidMount() {
     this.is_mounted = true;
+    setInterval(this.update, 5000);
   }
   componentWillUnmount() {
     this.is_mounted = false;
   }
+  updateVelocityGraph = () => {
+    if(this.is_mounted) {
+      let currentThis = this;
+      const db = firebase.firestore();
+      currentThis.setState((prevState, props) => {
+        prevState.velocityRaw = [];
+        return {
+          velocityRaw: prevState.velocityRaw
+        }
+      });
+      db.collection("data").orderBy("time", "asc").limit(10)
+          .get()
+          .then(function (querySnapshot) {
+            querySnapshot.forEach(function (doc) {
+              currentThis.setState((prevState, props) => {
+                prevState.velocityRaw.push(doc.data()['velocity']);
+                console.log("Velocity raw: " + prevState.velocityRaw);
+                var i;
+                var temp = [];
+                for (i = 0; i < prevState.velocityRaw.length; i++) {
+                  temp.push(prevState.velocityRaw[i]);
+                }
+                prevState.velocityData = {
+                  labels: [doc.data()['velocity'], prevState.velocityRaw[0], 3, 4, 5, 6, 7, 8, 9, 10],
+                  series: [[Number(prevState.velocityRaw[0]), Number(prevState.velocityRaw[1]), Number(prevState.velocityRaw[2]),
+                    Number(prevState.velocityRaw[3]), Number(prevState.velocityRaw[4]),
+                    Number(prevState.velocityRaw[5]), Number(prevState.velocityRaw[6]), Number(prevState.velocityRaw[7]),
+                    Number(prevState.velocityRaw[8]), Number(prevState.velocityRaw[9])]
+                  ]
+                };
+                return {
+                  velocityRaw: prevState.velocityRaw,
+                  velocityData: prevState.velocityData
+                }
+              });
+            });
+          })
+          .catch(function (error) {
+            console.log("Error getting documents: ", error);
+          });
+    }
+  };
+
 
   createLegend(json) {
     var legend = [];
@@ -206,13 +259,13 @@ class Dashboard extends Component {
               <Card
                 statsIcon="fa fa-history"
                 id="voltageChart"
-                title="Voltage Chart (Volts)"
+                title="Velocity Chart (Volts)"
                 category=""
                 stats="Updated 2 minutes ago"
                 content={
                   <div className="ct-chart">
                     <ChartistGraph
-                      data={mockVoltageData}
+                      data={this.state.velocityData}
                       type="Line"
                       options={voltageChart}
                       responsiveOptions={responsiveSales}
