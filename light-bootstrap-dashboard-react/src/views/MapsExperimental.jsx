@@ -73,12 +73,12 @@ class MapsExperimental extends Component {
     }
     render() {
         return (
-            <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+            <MapContainer center={[7.5150, 134.5825]} zoom={13} scrollWheelZoom={true}>
                 <TileLayer
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                <Marker position={[51.505, -0.09]}>
+                <Marker position={[7.5150, 134.5825]}>
                     <Popup>
                         A pretty CSS3 popup. <br /> Easily customizable.
                     </Popup>

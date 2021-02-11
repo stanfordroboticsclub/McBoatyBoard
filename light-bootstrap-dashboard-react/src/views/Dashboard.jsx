@@ -54,7 +54,8 @@ class Dashboard extends Component {
       velocityData: {
         labels: [      ],
         series:[]
-      }
+      },
+      responseToPost: ""
     };
 
     this.props.client.onmessage = (message) => {
@@ -67,7 +68,7 @@ class Dashboard extends Component {
           recent: prevState.recent
         }
       });
-      this.writeUserData();
+      //this.writeUserData();
     };
   }
  // Writes User Data
@@ -143,9 +144,43 @@ class Dashboard extends Component {
     this.deleteDocuments();
     this.updateVelocityGraph();
   };
+  updateLocal = () => {
+    if (this.is_mounted) {
+      this.callApi()
+          .then(res => this.setState({databaseRecent: res.express}))
+          .catch(err => console.log(err));
+      console.log("Received: ", this.state.databaseRecent);
+    }
+  };
+  callApi = async () => {
+    if (this.is_mounted) {
+      const response = await fetch('http://localhost:5000/api/get');
+      const body = await response.json();
+      if (response.status !== 200) throw Error(body.message);
+      return body;
+    }
+  };
+  handleSubmit = async e => {
+    if(this.is_mounted) {
+      console.log("Sending recent: ", this.state.recent);
+      e.preventDefault();
+      const response = await fetch('http://localhost:5000/api/push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({post: this.state.recent}),
+        mode: "cors",
+      });
+      const body = await response.text();
+
+      this.setState({responseToPost: body});
+      console.log("Response from server: ", this.state.responseToPost);
+    }
+  };
   componentDidMount() {
     this.is_mounted = true;
-    setInterval(this.update, 5000);
+    //setInterval(this.update, 5000);
   }
   componentWillUnmount() {
     this.is_mounted = false;
@@ -239,10 +274,13 @@ class Dashboard extends Component {
               />
             </Col>
             <Col lg={3} sm={6}>
-              <button onClick={this.getData}> GET REQUEST </button>
+              <button onClick={this.update}> Push to Cloud </button>
             </Col>
             <Col lg={3} sm={6}>
-              <button onClick={this.deleteDocuments}> Delete </button>
+              <button onClick={this.updateLocal}> Pull from Local </button>
+            </Col>
+            <Col lg={3} sm={6}>
+              <button onClick={this.handleSubmit}> Push to Local </button>
             </Col>
             {/*<Col lg={3} sm={6}>*/}
             {/*  <StatsCard*/}
