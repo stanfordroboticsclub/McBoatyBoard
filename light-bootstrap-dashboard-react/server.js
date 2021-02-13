@@ -5,7 +5,7 @@ const Datastore = require('nedb');
 const app = express();
 const port = process.env.PORT || 5000;
 
-const db = new Datastore('./dbs/database.db');
+const db = new Datastore({ filename:'./dbs/database.db', timestampData: 'true'});
 db.loadDatabase();
 
 app.use(bodyParser.json());
@@ -29,21 +29,23 @@ app.use(function (req, res, next) {
     // Pass to next layer of middleware
     next();
 });
-
 app.get('/api/get', (req, res) => {
-    db.find({}, (err, data) => {
+    const minTimestamp = Date.now() - 1000000;
+    db.find({"time": {$gt: minTimestamp}}, (err, data) => {
         if (err) {
             res.end();
             return;
         }
-        console.log("Found");
+        console.log("Found", data);
         res.send({ express: data });
     });
 });
 
 app.post('/api/push', (req, res) => {
     console.log(req.body);
-    db.insert(res);
+    db.insert(req.body, function (err) {
+        console.log("User PROBLEM: ", err)
+    });
     res.send(
         `I received your POST request. This is what you sent me: ${res}`,
     );

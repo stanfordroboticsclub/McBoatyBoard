@@ -49,7 +49,7 @@ class Dashboard extends Component {
     this.state = {
       logs: ['{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}'],
       recent: '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}',
-      databaseRecent: '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}',
+      databaseRecent: '{{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : 0, "battery" : 100},{}}',
       velocityRaw: [],
       velocityData: {
         labels: [      ],
@@ -149,7 +149,8 @@ class Dashboard extends Component {
       this.callApi()
           .then(res => this.setState({databaseRecent: res.express}))
           .catch(err => console.log(err));
-      console.log("Received: ", this.state.databaseRecent);
+      console.log("Received: ", this.state.databaseRecent[this.state.databaseRecent.length - 1]['time']);
+      console.log("Length: ", this.state.databaseRecent.length);
     }
   };
   callApi = async () => {
@@ -160,31 +161,60 @@ class Dashboard extends Component {
       return body;
     }
   };
+  //JSON.stringify({post: this.state.recent})
   handleSubmit = async e => {
     if(this.is_mounted) {
-      console.log("Sending recent: ", this.state.recent);
-      e.preventDefault();
+      //console.log("Sending recent: ", this.state.recent);
+      // e.preventDefault();
       const response = await fetch('http://localhost:5000/api/push', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({post: this.state.recent}),
+        body: this.state.recent,
         mode: "cors",
       });
       const body = await response.text();
 
       this.setState({responseToPost: body});
-      console.log("Response from server: ", this.state.responseToPost);
+      //console.log("Response from server: ", this.state.responseToPost);
     }
   };
   componentDidMount() {
     this.is_mounted = true;
-    //setInterval(this.update, 5000);
+    setInterval(this.handleSubmit, 2000);
+    setInterval(this.updateLocal, 2000);
+    setInterval(this.updateGraphLocal, 2000);
+
   }
   componentWillUnmount() {
     this.is_mounted = false;
   }
+  updateGraphLocal = () => {
+    if(this.is_mounted) {
+      let currentThis = this;
+
+      currentThis.setState((prevState, props) => {
+        var i = 0;
+        var series2 = [];
+        var series3 = [];
+        for (i = 0; i < prevState.databaseRecent.length - 1; i++) {
+          series3.push(i);
+          series2.push(prevState.databaseRecent[i]['velocity']);
+        }
+
+        prevState.velocityData = {
+          labels: series3,
+          series: [series2]
+
+        };
+        return {
+          velocityRaw: prevState.velocityRaw,
+          velocityData: prevState.velocityData
+        }
+      });
+    }
+  };
   updateVelocityGraph = () => {
     if(this.is_mounted) {
       let currentThis = this;
@@ -250,7 +280,7 @@ class Dashboard extends Component {
               <StatsCard
                 bigIcon={<i className="pe-7s-battery text-warning" />}
                 statsText="Battery"
-                statsValue= {this.state.databaseRecent['battery']}
+                statsValue= {this.state.databaseRecent[this.state.databaseRecent.length - 1]['battery']}
                 statsIcon={<i className="fa fa-refresh" />}
                 statsIconText="Updated now"
               />
@@ -259,7 +289,7 @@ class Dashboard extends Component {
               <StatsCard
                 bigIcon={<i className="pe-7s-network text-success" />}
                 statsText="Network"
-                statsValue={this.state.databaseRecent['lat']}
+                statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['lat']}
                 statsIcon={<i className="fa fa-refresh" />}
                 statsIconText="Updated Now"
               />
@@ -274,7 +304,7 @@ class Dashboard extends Component {
               />
             </Col>
             <Col lg={3} sm={6}>
-              <button onClick={this.update}> Push to Cloud </button>
+              <button > Push to Cloud </button>
             </Col>
             <Col lg={3} sm={6}>
               <button onClick={this.updateLocal}> Pull from Local </button>
