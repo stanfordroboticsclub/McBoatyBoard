@@ -52,7 +52,7 @@ const dashboardRoutes = [
     path: "/maps",
     name: "Maps",
     icon: "pe-7s-map-marker",
-    component: MapsExperimental,
+    component: Maps,
     layout: "/admin"
   },
   {

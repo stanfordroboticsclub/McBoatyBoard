@@ -30,7 +30,7 @@ app.use(function (req, res, next) {
     next();
 });
 app.get('/api/get', (req, res) => {
-    const minTimestamp = Date.now() - 1000000;
+    const minTimestamp = Date.now() - 20000;
     db.find({"time": {$gt: minTimestamp}}, (err, data) => {
         if (err) {
             res.end();

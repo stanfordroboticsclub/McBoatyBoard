@@ -69,6 +69,7 @@ class Dashboard extends Component {
         }
       });
       //this.writeUserData();
+      this.handleSubmit();
     };
   }
  // Writes User Data
@@ -149,6 +150,19 @@ class Dashboard extends Component {
       this.callApi()
           .then(res => this.setState({databaseRecent: res.express}))
           .catch(err => console.log(err));
+      let currentThis = this;
+      currentThis.setState((prevState, props) => {
+        console.log("Database Recent: ", prevState.databaseRecent);
+        console.log("Length: ", this.state.databaseRecent.length);
+        if(this.state.databaseRecent.length > 1 && this.state.databaseRecent.length !== 88) {
+          prevState.databaseRecent.sort(function(a, b){
+            return parseFloat(a.time) - parseFloat(b.time);
+          });
+        }
+        return {
+          databaseRecent: prevState.databaseRecent
+        }
+      });
       console.log("Received: ", this.state.databaseRecent[this.state.databaseRecent.length - 1]['time']);
       console.log("Length: ", this.state.databaseRecent.length);
     }
@@ -182,7 +196,7 @@ class Dashboard extends Component {
   };
   componentDidMount() {
     this.is_mounted = true;
-    setInterval(this.handleSubmit, 2000);
+    //setInterval(this.handleSubmit, 2000);
     setInterval(this.updateLocal, 2000);
     setInterval(this.updateGraphLocal, 2000);
 
@@ -287,8 +301,8 @@ class Dashboard extends Component {
             </Col>
             <Col lg={3} sm={6}>
               <StatsCard
-                bigIcon={<i className="pe-7s-network text-success" />}
-                statsText="Network"
+                bigIcon={<i className="pe-7s-map-2 text-success" />}
+                statsText="Latitude"
                 statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['lat']}
                 statsIcon={<i className="fa fa-refresh" />}
                 statsIconText="Updated Now"
@@ -296,22 +310,40 @@ class Dashboard extends Component {
             </Col>
             <Col lg={3} sm={6}>
               <StatsCard
-                bigIcon={<i className="pe-7s-note text-danger" />}
-                statsText="Notifications"
-                statsValue="0"
-                statsIcon={<i className="fa fa-clock-o" />}
-                statsIconText="In the last hour"
+                  bigIcon={<i className="pe-7s-map-2 text-success" />}
+                  statsText="Longitude"
+                  statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['long']}
+                  statsIcon={<i className="fa fa-refresh" />}
+                  statsIconText="Updated Now"
               />
             </Col>
             <Col lg={3} sm={6}>
-              <button > Push to Cloud </button>
+              <StatsCard
+                  bigIcon={<i className="pe-7s-magnet text-success" />}
+                  statsText="Orientation"
+                  statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['orientation']}
+                  statsIcon={<i className="fa fa-refresh" />}
+                  statsIconText="Updated Now"
+              />
             </Col>
-            <Col lg={3} sm={6}>
-              <button onClick={this.updateLocal}> Pull from Local </button>
-            </Col>
-            <Col lg={3} sm={6}>
-              <button onClick={this.handleSubmit}> Push to Local </button>
-            </Col>
+            {/*<Col lg={3} sm={6}>*/}
+            {/*  <StatsCard*/}
+            {/*    bigIcon={<i className="pe-7s-note text-danger" />}*/}
+            {/*    statsText="Notifications"*/}
+            {/*    statsValue="0"*/}
+            {/*    statsIcon={<i className="fa fa-clock-o" />}*/}
+            {/*    statsIconText="In the last hour"*/}
+            {/*  />*/}
+            {/*</Col>*/}
+            {/*<Col lg={3} sm={6}>*/}
+            {/*  <button > Push to Cloud </button>*/}
+            {/*</Col>*/}
+            {/*<Col lg={3} sm={6}>*/}
+            {/*  <button onClick={this.updateLocal}> Pull from Local </button>*/}
+            {/*</Col>*/}
+            {/*<Col lg={3} sm={6}>*/}
+            {/*  <button onClick={this.handleSubmit}> Push to Local </button>*/}
+            {/*</Col>*/}
             {/*<Col lg={3} sm={6}>*/}
             {/*  <StatsCard*/}
             {/*    bigIcon={<i className="fa fa-twitter text-info" />}*/}
@@ -327,9 +359,9 @@ class Dashboard extends Component {
               <Card
                 statsIcon="fa fa-history"
                 id="voltageChart"
-                title="Velocity Chart (Volts)"
+                title="Velocity Chart ()"
                 category=""
-                stats="Updated 2 minutes ago"
+                stats=""
                 content={
                   <div className="ct-chart">
                     <ChartistGraph
