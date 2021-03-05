@@ -19,7 +19,18 @@ import React, {Component} from "react";
 
 import $ from 'jquery';
 import L from 'leaflet';
+import boat from "assets/img/boat.png";
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
+
+var boatIcon = L.icon({
+    iconUrl: boat,
+    // shadowUrl: "assets/img/boat.png",
+    iconSize:     [128, 128], // size of the icon
+    // shadowSize:   [48, 48], // size of the shadow
+    iconAnchor:   [64, 64], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 5],  // the same for the shadow
+    popupAnchor:  [-3, -5] // point from which the popup should open relative to the iconAnchor
+});
 const provider = new OpenStreetMapProvider();
 const searchControl = new GeoSearchControl({
     provider: provider, // required
@@ -62,8 +73,6 @@ class Maps extends Component {
     {
         this.is_mounted = true;
         if (!this.state.map) this.init();
-        console.log(":LKSDJF:LKDS", this.is_mounted);
-
     }
     componentWillUnmount() {
         this.is_mounted = false;
@@ -71,8 +80,8 @@ class Maps extends Component {
 
 // Script for adding marker on map click
     onMapClick(e) {
-        console.log("is mount", this.is_mounted);
         if(this.is_mounted) {
+            console.log("Map clicked: ",e.latlng.lat, e.latlng.lng);
             var geojsonFeature = {
                 "type": "Feature",
                 "properties": {},
@@ -90,7 +99,7 @@ class Maps extends Component {
                 pointToLayer: function (feature, latlng) {
 
                     marker = L.marker(e.latlng, {
-
+                        icon: boatIcon,
                         title: "Location: " + e.latlng.toString(),
                         alt: "Resource Location",
                         riseOnHover: true,
@@ -170,6 +179,7 @@ class Maps extends Component {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        L.marker([7.462490667478755, 134.633492079957], {icon: boatIcon}).addTo(map);
         // set our state to include the tile layer
         this.setState({ map, tileLayer },() => {
             this.state.map.on('click', this.onMapClick);
@@ -178,7 +188,6 @@ class Maps extends Component {
 
         console.log("MAP WAS INITTED");
         // attaching function on map click
-
         $(".get-markers").on("click", this.getAllMarkers);
     }
     render() {
@@ -187,14 +196,6 @@ class Maps extends Component {
     }
 
 }
-
-
-const csvData = [
-    ["firstname", "lastname", "email"],
-    ["Ahmed", "Tomi", "ah@smthing.co.com"],
-    ["Raed", "Labes", "rl@smthing.co.com"],
-    ["Yezzi", "Min l3b", "ymin@cocococo.com"]
-];
 
 
 {/* <CSVDownload data={csvData} target="_blank" />; */}
