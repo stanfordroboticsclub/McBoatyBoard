@@ -50,6 +50,8 @@ const searchControl = new GeoSearchControl({
     keepResult: false, // optional: true|false  - default false
     updateMap: true, // optional: true|false  - default true
 });
+var boat2;
+var polylinee = null;
 var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
     osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     osm = L.tileLayer(osmUrl, {
@@ -64,7 +66,9 @@ class Maps extends Component {
             map: null,
             tileLayer: null,
             geojsonLayer: null,
-            geojson: null
+            geojson: null,
+            databaseRecent: props.databaseRecent,
+            boatPath: [[0,0]]
         };
         this.onMapClick = this.onMapClick.bind(this);
     }
@@ -73,11 +77,44 @@ class Maps extends Component {
     {
         this.is_mounted = true;
         if (!this.state.map) this.init();
+        setInterval(this.loopAndSave, 2000);
     }
     componentWillUnmount() {
         this.is_mounted = false;
     }
+    loopAndSave = () => {
+        if (this.is_mounted) {
+            let currentThis = this;
+                currentThis.setState((prevState, props) => {
+                    var i = 0;
+                    prevState.boatPath = [];
 
+                    var prev = [7.4602630849104,134.615571016213];
+                    if (props.databaseRecent.length !== 88) {
+                        var length = props.databaseRecent.length - 1;
+                        for (i = 0; i < props.databaseRecent.length - 1; i++) {
+                            let ar = [props.databaseRecent[i]['px'], props.databaseRecent[i]['py']];
+                            prevState.boatPath.push(ar);
+                            console.log("ARR", ar);
+                                polylinee = L.polyline([prev, ar], {color: 'red'}).addTo(prevState.map);
+                            prev = ar;
+                        }
+                        var latlng = L.latLng(props.databaseRecent[length]['px'], props.databaseRecent[length]['py']);
+                        boat2.setLatLng(latlng);
+                    }
+                    if (polylinee != null) {
+                        prevState.map.removeLayer(polylinee);
+                        // polyline.removeFrom(prevState.map);
+                    }
+
+                    return {
+                        boatPath: prevState.boatPath,
+                        map: prevState.map
+                    }
+
+                });
+        }
+    };
 // Script for adding marker on map click
     onMapClick(e) {
         if(this.is_mounted) {
@@ -99,7 +136,7 @@ class Maps extends Component {
                 pointToLayer: function (feature, latlng) {
 
                     marker = L.marker(e.latlng, {
-                        icon: boatIcon,
+                        // icon: boatIcon,
                         title: "Location: " + e.latlng.toString(),
                         alt: "Resource Location",
                         riseOnHover: true,
@@ -179,7 +216,7 @@ class Maps extends Component {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        L.marker([7.462490667478755, 134.633492079957], {icon: boatIcon}).addTo(map);
+        boat2 = L.marker([7.462490667478755, 134.633492079957], {icon: boatIcon}).addTo(map);
         // set our state to include the tile layer
         this.setState({ map, tileLayer },() => {
             this.state.map.on('click', this.onMapClick);

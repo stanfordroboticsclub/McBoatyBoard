@@ -35,7 +35,7 @@ import config from "../assets/config";
 import firebase from "firebase";
 
 var localLogs = ['{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}',
-  '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}'];
+  '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100", "px" : "1", "py" : "2"}'];
 var oneLog = '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}';
 class Dashboard extends Component {
   is_mounted = false;
@@ -49,7 +49,8 @@ class Dashboard extends Component {
     this.state = {
       logs: ['{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}'],
       recent: '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : "", "battery" : "100"}',
-      databaseRecent: '{{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : 0, "battery" : 100},{}}',
+      databaseRecent: '{{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : 0, "battery" : 100},' +
+          '{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : 0, "battery" : 100}}',
       velocityRaw: [],
       velocityData: {
         labels: [      ],
@@ -58,151 +59,93 @@ class Dashboard extends Component {
       responseToPost: ""
     };
 
-    this.props.client.onmessage = (message) => {
-      this.setState((prevState, props) => {
-        prevState.logs.push(message.data.toString());
-        prevState.recent = message.data.toString();
-        //console.log("On Message: ", message.data);
-        return {
-          logs: prevState.logs,
-          recent: prevState.recent
-        }
-      });
-      //this.writeUserData();
-      this.handleSubmit();
-    };
+
   }
  // Writes User Data
-  writeUserData = () => {
-    if (this.is_mounted) {
-      const db = firebase.firestore();
-      var time = new Date();
-      var stringTime = time.getTime().toString();
-      db.collection("data").doc(stringTime).set({
-        time: stringTime,
-        raw: this.state.recent,
-        lat: JSON.parse(this.state.recent).lat,
-        long: JSON.parse(this.state.recent).long,
-        velocity: JSON.parse(this.state.recent).velocity,
-        orientation: JSON.parse(this.state.recent).orientation,
-        battery: JSON.parse(this.state.recent).battery
-      });
-    }
-  };
+ //  writeUserData = () => {
+ //    if (this.is_mounted) {
+ //      const db = firebase.firestore();
+ //      var time = new Date();
+ //      var stringTime = time.getTime().toString();
+ //      db.collection("data").doc(stringTime).set({
+ //        time: stringTime,
+ //        raw: this.state.recent,
+ //        lat: JSON.parse(this.state.recent).lat,
+ //        long: JSON.parse(this.state.recent).long,
+ //        velocity: JSON.parse(this.state.recent).velocity,
+ //        orientation: JSON.parse(this.state.recent).orientation,
+ //        battery: JSON.parse(this.state.recent).battery
+ //      });
+ //    }
+ //  };
 
   //Delete x amount of documents
-  deleteDocuments = () => {
-    const db = firebase.firestore();
-    var size = 0;
-    var deleteSize = 0;
+  // deleteDocuments = () => {
+  //   const db = firebase.firestore();
+  //   var size = 0;
+  //   var deleteSize = 0;
+  //
+  //   db.collection("data").orderBy("time", "asc").limit(100)
+  //       .get()
+  //       .then(function (querySnapshot) {
+  //         var counter = querySnapshot.size.valueOf();
+  //         querySnapshot.forEach(function (doc) {
+  //             if (counter > 10) {
+  //               counter--;
+  //               db.collection("data").doc(doc.id).delete().then(function () {
+  //                 console.log("Document successfully deleted!");
+  //               }).catch(function (error) {
+  //                 console.error("Error removing document: ", error);
+  //               });
+  //             }
+  //         });
+  //       })
+  //       .catch(function (error) {
+  //         console.log("Error getting documents: ", error);
+  //       });
+  // };
 
-    db.collection("data").orderBy("time", "asc").limit(100)
-        .get()
-        .then(function (querySnapshot) {
-          var counter = querySnapshot.size.valueOf();
-          querySnapshot.forEach(function (doc) {
-              if (counter > 10) {
-                counter--;
-                db.collection("data").doc(doc.id).delete().then(function () {
-                  console.log("Document successfully deleted!");
-                }).catch(function (error) {
-                  console.error("Error removing document: ", error);
-                });
-              }
-          });
-        })
-        .catch(function (error) {
-          console.log("Error getting documents: ", error);
-        });
-  };
+  // getData = () => {
+  //   if(this.is_mounted) {
+  //     let currentThis = this;
+  //     const db = firebase.firestore();
+  //     db.collection("data").orderBy("time", "desc").limit(1)
+  //         .get()
+  //         .then(function (querySnapshot) {
+  //           querySnapshot.forEach(function (doc) {
+  //             // doc.data() is never undefined for query doc snapshots
+  //             //console.log(doc.id, " => ", doc.data());
+  //             currentThis.setState((prevState, props) => {
+  //               prevState.databaseRecent = doc.data();
+  //               //console.log("Saved Database Get Data to React State", prevState.databaseRecent);
+  //               return {
+  //                 databaseRecent: prevState.databaseRecent
+  //               }
+  //             });
+  //           });
+  //         })
+  //         .catch(function (error) {
+  //           console.log("Error getting documents: ", error);
+  //         });
+  //   }
+  // };
+  // update = () => {
+  //   this.getData();
+  //   this.deleteDocuments();
+  //   this.updateVelocityGraph();
+  // };
 
-  getData = () => {
-    if(this.is_mounted) {
-      let currentThis = this;
-      const db = firebase.firestore();
-      db.collection("data").orderBy("time", "desc").limit(1)
-          .get()
-          .then(function (querySnapshot) {
-            querySnapshot.forEach(function (doc) {
-              // doc.data() is never undefined for query doc snapshots
-              //console.log(doc.id, " => ", doc.data());
-              currentThis.setState((prevState, props) => {
-                prevState.databaseRecent = doc.data();
-                //console.log("Saved Database Get Data to React State", prevState.databaseRecent);
-                return {
-                  databaseRecent: prevState.databaseRecent
-                }
-              });
-            });
-          })
-          .catch(function (error) {
-            console.log("Error getting documents: ", error);
-          });
-    }
-  };
-  update = () => {
-    this.getData();
-    this.deleteDocuments();
-    this.updateVelocityGraph();
-  };
-  updateLocal = () => {
-    if (this.is_mounted) {
-      this.callApi()
-          .then(res => this.setState({databaseRecent: res.express}))
-          .catch(err => console.log(err));
-      let currentThis = this;
-      currentThis.setState((prevState, props) => {
-        console.log("Database Recent: ", prevState.databaseRecent);
-        console.log("Length: ", this.state.databaseRecent.length);
-        if(this.state.databaseRecent.length > 1 && this.state.databaseRecent.length !== 88) {
-          prevState.databaseRecent.sort(function(a, b){
-            return parseFloat(a.time) - parseFloat(b.time);
-          });
-        }
-        return {
-          databaseRecent: prevState.databaseRecent
-        }
-      });
-      console.log("Received: ", this.state.databaseRecent[this.state.databaseRecent.length - 1]['time']);
-      console.log("Length: ", this.state.databaseRecent.length);
-    }
-  };
-  callApi = async () => {
-    if (this.is_mounted) {
-      const response = await fetch('http://localhost:5000/api/get');
-      const body = await response.json();
-      if (response.status !== 200) throw Error(body.message);
-      return body;
-    }
-  };
   //JSON.stringify({post: this.state.recent})
-  handleSubmit = async e => {
-    if(this.is_mounted) {
-      //console.log("Sending recent: ", this.state.recent);
-      // e.preventDefault();
-      const response = await fetch('http://localhost:5000/api/push', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: this.state.recent,
-        mode: "cors",
-      });
-      const body = await response.text();
 
-      this.setState({responseToPost: body});
-      //console.log("Response from server: ", this.state.responseToPost);
-    }
-  };
-  componentDidMount() {
+  componentWillMount() {
     this.is_mounted = true;
-    //setInterval(this.handleSubmit, 2000);
-    setInterval(this.updateLocal, 2000);
     setInterval(this.updateGraphLocal, 2000);
-
+    console.log("Mounted", this.is_mounted);
   }
+
   componentWillUnmount() {
     this.is_mounted = false;
+    console.log("Component unmounting...")
   }
   updateGraphLocal = () => {
     if(this.is_mounted) {
@@ -212,11 +155,10 @@ class Dashboard extends Component {
         var i = 0;
         var series2 = [];
         var series3 = [];
-        for (i = 0; i < prevState.databaseRecent.length - 1; i++) {
+        for (i = 0; i < props.databaseRecent.length - 1; i++) {
           series3.push(i);
-          series2.push(prevState.databaseRecent[i]['velocity']);
+          series2.push(props.databaseRecent[i]['velocity']);
         }
-
         prevState.velocityData = {
           labels: series3,
           series: [series2]
@@ -229,48 +171,48 @@ class Dashboard extends Component {
       });
     }
   };
-  updateVelocityGraph = () => {
-    if(this.is_mounted) {
-      let currentThis = this;
-      const db = firebase.firestore();
-      currentThis.setState((prevState, props) => {
-        prevState.velocityRaw = [];
-        return {
-          velocityRaw: prevState.velocityRaw
-        }
-      });
-      db.collection("data").orderBy("time", "asc").limit(10)
-          .get()
-          .then(function (querySnapshot) {
-            querySnapshot.forEach(function (doc) {
-              currentThis.setState((prevState, props) => {
-                prevState.velocityRaw.push(doc.data()['velocity']);
-                console.log("Velocity raw: " + prevState.velocityRaw);
-                var i;
-                var temp = [];
-                for (i = 0; i < prevState.velocityRaw.length; i++) {
-                  temp.push(prevState.velocityRaw[i]);
-                }
-                prevState.velocityData = {
-                  labels: [doc.data()['velocity'], prevState.velocityRaw[0], 3, 4, 5, 6, 7, 8, 9, 10],
-                  series: [[Number(prevState.velocityRaw[0]), Number(prevState.velocityRaw[1]), Number(prevState.velocityRaw[2]),
-                    Number(prevState.velocityRaw[3]), Number(prevState.velocityRaw[4]),
-                    Number(prevState.velocityRaw[5]), Number(prevState.velocityRaw[6]), Number(prevState.velocityRaw[7]),
-                    Number(prevState.velocityRaw[8]), Number(prevState.velocityRaw[9])]
-                  ]
-                };
-                return {
-                  velocityRaw: prevState.velocityRaw,
-                  velocityData: prevState.velocityData
-                }
-              });
-            });
-          })
-          .catch(function (error) {
-            console.log("Error getting documents: ", error);
-          });
-    }
-  };
+  // updateVelocityGraph = () => {
+  //   if(this.is_mounted) {
+  //     let currentThis = this;
+  //     const db = firebase.firestore();
+  //     currentThis.setState((prevState, props) => {
+  //       prevState.velocityRaw = [];
+  //       return {
+  //         velocityRaw: prevState.velocityRaw
+  //       }
+  //     });
+  //     db.collection("data").orderBy("time", "asc").limit(10)
+  //         .get()
+  //         .then(function (querySnapshot) {
+  //           querySnapshot.forEach(function (doc) {
+  //             currentThis.setState((prevState, props) => {
+  //               prevState.velocityRaw.push(doc.data()['velocity']);
+  //               console.log("Velocity raw: " + prevState.velocityRaw);
+  //               var i;
+  //               var temp = [];
+  //               for (i = 0; i < prevState.velocityRaw.length; i++) {
+  //                 temp.push(prevState.velocityRaw[i]);
+  //               }
+  //               prevState.velocityData = {
+  //                 labels: [doc.data()['velocity'], prevState.velocityRaw[0], 3, 4, 5, 6, 7, 8, 9, 10],
+  //                 series: [[Number(prevState.velocityRaw[0]), Number(prevState.velocityRaw[1]), Number(prevState.velocityRaw[2]),
+  //                   Number(prevState.velocityRaw[3]), Number(prevState.velocityRaw[4]),
+  //                   Number(prevState.velocityRaw[5]), Number(prevState.velocityRaw[6]), Number(prevState.velocityRaw[7]),
+  //                   Number(prevState.velocityRaw[8]), Number(prevState.velocityRaw[9])]
+  //                 ]
+  //               };
+  //               return {
+  //                 velocityRaw: prevState.velocityRaw,
+  //                 velocityData: prevState.velocityData
+  //               }
+  //             });
+  //           });
+  //         })
+  //         .catch(function (error) {
+  //           console.log("Error getting documents: ", error);
+  //         });
+  //   }
+  // };
 
 
   createLegend(json) {
@@ -294,7 +236,7 @@ class Dashboard extends Component {
               <StatsCard
                 bigIcon={<i className="pe-7s-battery text-warning" />}
                 statsText="Battery"
-                statsValue= {this.state.databaseRecent[this.state.databaseRecent.length - 1]['battery']}
+                statsValue= {this.props.databaseRecent[this.props.databaseRecent.length - 1]['battery']}
                 statsIcon={<i className="fa fa-refresh" />}
                 statsIconText="Updated now"
               />
@@ -303,7 +245,7 @@ class Dashboard extends Component {
               <StatsCard
                 bigIcon={<i className="pe-7s-map-2 text-success" />}
                 statsText="Latitude"
-                statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['lat']}
+                statsValue={this.props.databaseRecent[this.props.databaseRecent.length - 1]['lat']}
                 statsIcon={<i className="fa fa-refresh" />}
                 statsIconText="Updated Now"
               />
@@ -312,7 +254,7 @@ class Dashboard extends Component {
               <StatsCard
                   bigIcon={<i className="pe-7s-map-2 text-success" />}
                   statsText="Longitude"
-                  statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['long']}
+                  statsValue={this.props.databaseRecent[this.props.databaseRecent.length - 1]['long']}
                   statsIcon={<i className="fa fa-refresh" />}
                   statsIconText="Updated Now"
               />
@@ -321,7 +263,7 @@ class Dashboard extends Component {
               <StatsCard
                   bigIcon={<i className="pe-7s-magnet text-success" />}
                   statsText="Orientation"
-                  statsValue={this.state.databaseRecent[this.state.databaseRecent.length - 1]['orientation']}
+                  statsValue={this.props.databaseRecent[this.props.databaseRecent.length - 1]['orientation']}
                   statsIcon={<i className="fa fa-refresh" />}
                   statsIconText="Updated Now"
               />
@@ -400,7 +342,7 @@ class Dashboard extends Component {
 
           <Row>
             <Col md={6}>
-              {this.state.logs.toString()}
+              {/*{this.state.logs.toString()}*/}
             </Col>
 
             {/*<Col md={6}>*/}

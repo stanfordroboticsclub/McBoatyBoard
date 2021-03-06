@@ -32,13 +32,10 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 
 class Admin extends Component {
-
+  is_mounted = false;
   constructor(props) {
     super(props);
     const client = new W3CWebSocket('ws://localhost:9999/');
-
-
-
     this.state = {
       _notificationSystem: null,
       image: image,
@@ -47,8 +44,11 @@ class Admin extends Component {
       messages: [],
       fixedClasses: "dropdown show-dropdown open",
       client: client,
+      recent: "",
+      databaseRecent:  '{{"lat" : "38", "long": "-123", "velocity" : "", "orientation" : 0, "battery" : 100},{}}',
       logs: []
     };
+
     console.log("Websocket something");
     client.onopen = () => {
       console.log('WebSocket Client Connected');
@@ -61,8 +61,73 @@ class Admin extends Component {
     //   console.log("received message");
     //   console.log(message.data);
     // };
+    this.state.client.onmessage = async (message) => {
+      if(this.is_mounted) {
+        this.setState((prevState, props) => {
+        prevState.logs.push(message.data.toString());
+        prevState.recent = message.data.toString();
+        //console.log("On Message: ", message.data);
+        return {
+          logs: prevState.logs,
+          recent: prevState.recent
+        }
+      });
+        const response = await fetch('http://localhost:5000/api/push', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: message.data.toString(),
+          mode: "cors",
+        });
+        const body = await response.text();
+
+        // this.setState({responseToPost: body});
+        // console.log("Response from server: ", this.state.responseToPost);
+      }
+    };
+    this.handler = this.handler.bind(this);
+  }
+  handler() {
+    this.setState({
+      databaseRecent: this.state.databaseRecent
+    })
   }
 
+  updateLocal = () => {
+    if (this.is_mounted) {
+      this.callApi()
+          .then(res => this.setState({databaseRecent: res.express}))
+          .catch(err => console.log(err));
+      console.log(this.state.databaseRecent);
+      let currentThis = this;
+      currentThis.setState((prevState, props) => {
+       // console.log("Database Recent: ", prevState.databaseRecent);
+        console.log("Length: ", this.state.databaseRecent.length);
+        if(this.state.databaseRecent.length > 1 && this.state.databaseRecent.length !== 88) {
+          prevState.databaseRecent.sort(function(a, b){
+            return parseFloat(a.time) - parseFloat(b.time);
+          });
+        }
+        return {
+          databaseRecent: prevState.databaseRecent
+        }
+      });
+      console.log("Received: ", this.state.databaseRecent[this.state.databaseRecent.length - 1]['time']);
+      //console.log("Length: ", this.state.databaseRecent.length);
+    }
+    else {
+      console.log("not mounted");
+    }
+  };
+  callApi = async () => {
+    if (this.is_mounted) {
+      const response = await fetch('http://localhost:5000/api/get');
+      const body = await response.json();
+      if (response.status !== 200) throw Error(body.message);
+      return body;
+    }
+  };
 
   handleNotificationClick = position => {
     var color = Math.floor(Math.random() * 4 + 1);
@@ -110,6 +175,8 @@ class Admin extends Component {
                 handleClick={this.handleNotificationClick}
                 handleNewLog = {this.handleNewLog}
                 logs = {this.state.logs}
+                databaseRecent = {this.state.databaseRecent}
+                handler = {this.handler}
               />
             )}
             key={key}
@@ -149,6 +216,7 @@ class Admin extends Component {
     }
   };
   componentDidMount() {
+    this.is_mounted = true;
     this.setState({ _notificationSystem: this.refs.notificationSystem });
     var _notificationSystem = this.refs.notificationSystem;
     var color = Math.floor(Math.random() * 4 + 1);
@@ -180,6 +248,8 @@ class Admin extends Component {
       position: "tr",
       autoDismiss: 15
     });
+    setInterval(this.updateLocal, 2000);
+    console.log("Set interval for updating");
   }
   componentDidUpdate(e) {
     if (
